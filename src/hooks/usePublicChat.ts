@@ -23,9 +23,19 @@ function getWsUrl(token: string): string {
   return `${wsProtocol}//${url.host}/ws?token=${encodeURIComponent(token)}`;
 }
 
+let sharedWs: WebSocket | null = null;
+
+export function useSendMessage() {
+  const send = useCallback((message: string) => {
+    if (sharedWs && sharedWs.readyState === WebSocket.OPEN) {
+      sharedWs.send(JSON.stringify({ type: "send_message", message }));
+    }
+  }, []);
+  return send;
+}
+
 export function usePublicChat() {
   const queryClient = useQueryClient();
-  const wsRef = useRef<WebSocket | null>(null);
   const reconnectRef = useRef(true);
   const connectRef = useRef<() => void>(null);
 
@@ -34,7 +44,7 @@ export function usePublicChat() {
     if (!token) return;
 
     const ws = new WebSocket(getWsUrl(token));
-    wsRef.current = ws;
+    sharedWs = ws;
 
     ws.onopen = () => {
       queryClient.invalidateQueries({ queryKey: ["publicChats"] });
@@ -79,7 +89,7 @@ export function usePublicChat() {
     };
 
     ws.onclose = () => {
-      wsRef.current = null;
+      sharedWs = null;
       queryClient.setQueryData<OnlineUser[]>(["onlineUsers"], []);
       if (reconnectRef.current) {
         setTimeout(() => connectRef.current?.(), 3000);
@@ -101,16 +111,8 @@ export function usePublicChat() {
 
     return () => {
       reconnectRef.current = false;
-      wsRef.current?.close();
+      sharedWs?.close();
     };
   }, [connect]);
 
-  const sendMessage = useCallback((message: string) => {
-    const ws = wsRef.current;
-    if (ws && ws.readyState === WebSocket.OPEN) {
-      ws.send(JSON.stringify({ type: "send_message", message }));
-    }
-  }, []);
-
-  return { sendMessage };
 }

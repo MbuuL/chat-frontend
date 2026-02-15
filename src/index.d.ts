@@ -36,3 +36,22 @@ interface PopupProps {
   items: PopupItem[];
   classNames?: PopupClassNames;
 }
+
+interface NavbarProps {
+  theme: "light" | "dark";
+  toggleTheme: () => void;
+  onlineUsers: OnlineUser[];
+  initial: string;
+  handleLogout: () => void;
+}
+
+interface ChatAreaMainProps {
+  chats: ChatMessage[];
+  user: { userId: string; username: string } | null;
+  isLoading: boolean;
+  message: string;
+  setMessage: React.Dispatch<React.SetStateAction<string>>;
+  handleSend: (e: React.FormEvent) => void;
+  messagesEndRef: React.RefObject<HTMLDivElement | null>;
+  isOnline: (userId: string) => boolean;
+}

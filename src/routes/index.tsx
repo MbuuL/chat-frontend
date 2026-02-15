@@ -5,9 +5,9 @@ export const Route = createFileRoute("/")({
   beforeLoad: async () => {
     const isLoggedIn = localStorage.getItem("token");
     if (isLoggedIn) {
-      throw redirect({ to: "/home", mask: { to: "/" } });
+      throw redirect({ to: "/home" });
     }
-    throw redirect({ to: "/login", mask: { to: "/" } });
+    throw redirect({ to: "/login" });
   },
 });
 

@@ -183,7 +183,7 @@ function Register() {
         <p className="mt-4 text-center text-sm text-gray-600 dark:text-gray-400">
           Already have an account?
           {" "}
-          <Link to="/login" className="text-blue-600 hover:underline dark:text-blue-400" mask={{ to: "/" }}>
+          <Link to="/login" className="text-blue-600 hover:underline dark:text-blue-400">
             Log in
           </Link>
         </p>
