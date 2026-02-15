@@ -2,6 +2,8 @@ import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
 import { useForm } from "@tanstack/react-form";
 import { useState } from "react";
 import { apiPost } from "../lib/api";
+import { useTheme } from "../hooks/useTheme";
+import { ThemeToggle } from "../components/ThemeToggle";
 
 export const Route = createFileRoute("/register")({
   component: Register,
@@ -10,6 +12,7 @@ export const Route = createFileRoute("/register")({
 function Register() {
   const navigate = useNavigate();
   const [serverError, setServerError] = useState<string | null>(null);
+  const { theme, toggleTheme } = useTheme();
 
   const form = useForm({
     defaultValues: {
@@ -35,14 +38,16 @@ function Register() {
   });
 
   return (
-    <div className="flex min-h-screen items-center justify-center">
-      <div className="w-full max-w-sm rounded-lg border border-gray-200 bg-white p-8 shadow-sm">
-        <h2 className="mb-6 text-center text-2xl font-bold text-gray-900">
+    <div className="flex min-h-screen items-center justify-center dark:bg-gray-950">
+      <div className="relative w-full max-w-sm rounded-lg border border-gray-200 bg-white p-8 shadow-sm dark:border-gray-700 dark:bg-gray-900">
+        <ThemeToggle theme={theme} onToggle={toggleTheme} className="absolute right-3 top-3" />
+
+        <h2 className="mb-6 text-center text-2xl font-bold text-gray-900 dark:text-gray-100">
           Register
         </h2>
 
         {serverError && (
-          <div className="mb-4 rounded bg-red-50 p-3 text-sm text-red-600">
+          <div className="mb-4 rounded bg-red-50 p-3 text-sm text-red-600 dark:bg-red-900/20 dark:text-red-400">
             {serverError}
           </div>
         )}
@@ -66,7 +71,7 @@ function Register() {
               <div>
                 <label
                   htmlFor={field.name}
-                  className="mb-1 block text-sm font-medium text-gray-700"
+                  className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300"
                 >
                   Username
                 </label>
@@ -76,10 +81,10 @@ function Register() {
                   value={field.state.value}
                   onBlur={field.handleBlur}
                   onChange={e => field.handleChange(e.target.value)}
-                  className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                  className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100"
                 />
                 {field.state.meta.errors.length > 0 && (
-                  <p className="mt-1 text-sm text-red-600">
+                  <p className="mt-1 text-sm text-red-600 dark:text-red-400">
                     {field.state.meta.errors[0]}
                   </p>
                 )}
@@ -100,7 +105,7 @@ function Register() {
               <div>
                 <label
                   htmlFor={field.name}
-                  className="mb-1 block text-sm font-medium text-gray-700"
+                  className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300"
                 >
                   Password
                 </label>
@@ -111,10 +116,10 @@ function Register() {
                   value={field.state.value}
                   onBlur={field.handleBlur}
                   onChange={e => field.handleChange(e.target.value)}
-                  className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                  className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100"
                 />
                 {field.state.meta.errors.length > 0 && (
-                  <p className="mt-1 text-sm text-red-600">
+                  <p className="mt-1 text-sm text-red-600 dark:text-red-400">
                     {field.state.meta.errors[0]}
                   </p>
                 )}
@@ -138,7 +143,7 @@ function Register() {
               <div>
                 <label
                   htmlFor={field.name}
-                  className="mb-1 block text-sm font-medium text-gray-700"
+                  className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300"
                 >
                   Confirm Password
                 </label>
@@ -149,10 +154,10 @@ function Register() {
                   value={field.state.value}
                   onBlur={field.handleBlur}
                   onChange={e => field.handleChange(e.target.value)}
-                  className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                  className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100"
                 />
                 {field.state.meta.errors.length > 0 && (
-                  <p className="mt-1 text-sm text-red-600">
+                  <p className="mt-1 text-sm text-red-600 dark:text-red-400">
                     {field.state.meta.errors[0]}
                   </p>
                 )}
@@ -175,10 +180,10 @@ function Register() {
           </form.Subscribe>
         </form>
 
-        <p className="mt-4 text-center text-sm text-gray-600">
+        <p className="mt-4 text-center text-sm text-gray-600 dark:text-gray-400">
           Already have an account?
           {" "}
-          <Link to="/login" className="text-blue-600 hover:underline" mask={{ to: "/" }}>
+          <Link to="/login" className="text-blue-600 hover:underline dark:text-blue-400" mask={{ to: "/" }}>
             Log in
           </Link>
         </p>

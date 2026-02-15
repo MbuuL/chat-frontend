@@ -3,7 +3,10 @@ import { useQuery } from "@tanstack/react-query";
 import { useState, useRef, useEffect } from "react";
 import { apiGet, getUser } from "../../lib/api";
 import { Popup } from "../../components/Popup";
+import { ThemeToggle } from "../../components/ThemeToggle";
 import { usePublicChat } from "../../hooks/usePublicChat";
+import { useOnlineUsers } from "../../hooks/useOnlineUsers";
+import { useTheme } from "../../hooks/useTheme";
 
 export const Route = createFileRoute("/home/")({
   component: HomePage,
@@ -15,6 +18,8 @@ function HomePage() {
   const [message, setMessage] = useState("");
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const { sendMessage } = usePublicChat();
+  const { onlineUsers, isOnline } = useOnlineUsers();
+  const { theme, toggleTheme } = useTheme();
 
   const handleLogout = () => {
     localStorage.removeItem("token");
@@ -43,29 +48,40 @@ function HomePage() {
   const initial = user?.username?.charAt(0).toUpperCase() ?? "?";
 
   return (
-    <div className="flex h-screen flex-col bg-gray-50">
+    <div className="flex h-screen flex-col bg-gray-50 dark:bg-gray-950">
       {/* Navbar */}
-      <nav className="flex items-center justify-between border-b border-gray-200 bg-white px-6 py-3 shadow-sm">
-        <span className="text-lg font-semibold text-gray-900">Chat</span>
-        <Popup
-          items={[{ label: "Log out", onClick: handleLogout }]}
-          classNames={{
-            container: "relative",
-            trigger: "flex h-9 w-9 cursor-pointer items-center justify-center rounded-full bg-blue-600 text-sm font-semibold text-white hover:bg-blue-700",
-          }}
-        >
-          {initial}
-        </Popup>
+      <nav className="flex items-center justify-between border-b border-gray-200 bg-white px-6 py-3 shadow-sm dark:border-gray-800 dark:bg-gray-900">
+        <div className="flex items-center gap-3">
+          <span className="text-lg font-semibold text-gray-900 dark:text-gray-100">Chat</span>
+          <span className="flex items-center gap-1 text-xs text-gray-500 dark:text-gray-400">
+            <span className="inline-block h-2 w-2 rounded-full bg-green-500" />
+            {onlineUsers.length}
+            {" "}
+            online
+          </span>
+        </div>
+        <div className="flex items-center gap-2">
+          <ThemeToggle theme={theme} onToggle={toggleTheme} />
+          <Popup
+            items={[{ label: "Log out", onClick: handleLogout }]}
+            classNames={{
+              container: "relative",
+              trigger: "flex h-9 w-9 cursor-pointer items-center justify-center rounded-full bg-blue-600 text-sm font-semibold text-white hover:bg-blue-700",
+            }}
+          >
+            {initial}
+          </Popup>
+        </div>
       </nav>
 
       {/* Chat area: 2-8-2 grid */}
       <div className="grid min-h-0 flex-1 grid-cols-12">
         <div className="col-span-2" />
-        <div className="col-span-8 flex flex-col border-x border-gray-200 bg-white">
+        <div className="col-span-8 flex flex-col border-x border-gray-200 bg-white dark:border-gray-800 dark:bg-gray-900">
           {/* Messages */}
           <div className="flex-1 overflow-y-auto p-4">
             {isLoading && (
-              <p className="text-center text-sm text-gray-400">Loading...</p>
+              <p className="text-center text-sm text-gray-400 dark:text-gray-500">Loading...</p>
             )}
 
             {chats.map((chat) => {
@@ -76,16 +92,19 @@ function HomePage() {
                   className={`mb-3 flex ${isOwn ? "justify-end" : "justify-start"}`}
                 >
                   <div
-                    className={`max-w-md rounded-lg px-3 py-2 ${isOwn ? "bg-blue-600 text-white" : "bg-gray-100 text-gray-900"}`}
+                    className={`max-w-md rounded-lg px-3 py-2 ${isOwn ? "bg-blue-600 text-white" : "bg-gray-100 text-gray-900 dark:bg-gray-800 dark:text-gray-100"}`}
                   >
                     {!isOwn && (
-                      <p className="mb-0.5 text-xs font-semibold text-gray-500">
+                      <p className="mb-0.5 flex items-center gap-1.5 text-xs font-semibold text-gray-500 dark:text-gray-400">
+                        <span
+                          className={`inline-block h-2 w-2 rounded-full ${isOnline(chat.fromId) ? "bg-green-500" : "bg-gray-300 dark:bg-gray-600"}`}
+                        />
                         {chat.from}
                       </p>
                     )}
                     <p className="text-sm">{chat.message}</p>
                     <p
-                      className={`mt-1 text-right text-[10px] ${isOwn ? "text-blue-200" : "text-gray-400"}`}
+                      className={`mt-1 text-right text-[10px] ${isOwn ? "text-blue-200" : "text-gray-400 dark:text-gray-500"}`}
                     >
                       {new Date(chat.createdAt).toLocaleTimeString([], {
                         hour: "2-digit",
@@ -102,14 +121,14 @@ function HomePage() {
           {/* Input */}
           <form
             onSubmit={handleSend}
-            className="flex items-center gap-2 border-t border-gray-200 px-4 py-3"
+            className="flex items-center gap-2 border-t border-gray-200 px-4 py-3 dark:border-gray-800"
           >
             <input
               type="text"
               value={message}
               onChange={e => setMessage(e.target.value)}
               placeholder="Type a message..."
-              className="flex-1 rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+              className="flex-1 rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100"
             />
             <button
               type="submit"
@@ -120,7 +139,17 @@ function HomePage() {
             </button>
           </form>
         </div>
-        <div className="col-span-2" />
+        <div className="col-span-2 border-l border-gray-200 bg-white p-4 dark:border-gray-800 dark:bg-gray-900">
+          <h3 className="mb-3 text-sm font-semibold text-gray-700 dark:text-gray-300">Online</h3>
+          <ul className="space-y-2">
+            {onlineUsers.map(u => (
+              <li key={u.userId} className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400">
+                <span className="inline-block h-2 w-2 rounded-full bg-green-500" />
+                {u.username}
+              </li>
+            ))}
+          </ul>
+        </div>
       </div>
     </div>
   );

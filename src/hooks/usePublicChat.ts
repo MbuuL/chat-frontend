@@ -11,6 +11,11 @@ interface ChatMessage {
   updatedAt: string;
 }
 
+interface OnlineUser {
+  userId: string;
+  username: string;
+}
+
 function getWsUrl(token: string): string {
   const httpUrl = import.meta.env.VITE_BACKEND_URL as string;
   const url = new URL(httpUrl);
@@ -22,6 +27,7 @@ export function usePublicChat() {
   const queryClient = useQueryClient();
   const wsRef = useRef<WebSocket | null>(null);
   const reconnectRef = useRef(true);
+  const connectRef = useRef<() => void>(null);
 
   const connect = useCallback(() => {
     const token = localStorage.getItem("token");
@@ -47,6 +53,25 @@ export function usePublicChat() {
             },
           );
         }
+
+        if (data.type === "online_users" && Array.isArray(data.users)) {
+          queryClient.setQueryData<OnlineUser[]>(["onlineUsers"], data.users);
+        }
+
+        if (data.type === "user_online" && data.userId) {
+          queryClient.setQueryData<OnlineUser[]>(["onlineUsers"], (old) => {
+            const current = old ?? [];
+            if (current.some(u => u.userId === data.userId)) return current;
+            return [...current, { userId: data.userId, username: data.username }];
+          });
+        }
+
+        if (data.type === "user_offline" && data.userId) {
+          queryClient.setQueryData<OnlineUser[]>(["onlineUsers"], (old) => {
+            if (!old) return [];
+            return old.filter(u => u.userId !== data.userId);
+          });
+        }
       }
       catch {
         // ignore malformed messages
@@ -55,8 +80,9 @@ export function usePublicChat() {
 
     ws.onclose = () => {
       wsRef.current = null;
+      queryClient.setQueryData<OnlineUser[]>(["onlineUsers"], []);
       if (reconnectRef.current) {
-        setTimeout(connect, 3000);
+        setTimeout(() => connectRef.current?.(), 3000);
       }
     };
 
@@ -64,6 +90,10 @@ export function usePublicChat() {
       ws.close();
     };
   }, [queryClient]);
+
+  useEffect(() => {
+    connectRef.current = connect;
+  }, [connect]);
 
   useEffect(() => {
     reconnectRef.current = true;

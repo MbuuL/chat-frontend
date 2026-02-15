@@ -14,6 +14,11 @@ interface ChatMessage {
   updatedAt: string;
 }
 
+interface OnlineUser {
+  userId: string;
+  username: string;
+}
+
 interface PopupItem {
   label: string;
   onClick: () => void;

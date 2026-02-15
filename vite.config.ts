@@ -13,4 +13,7 @@ export default defineConfig({
     react(),
     tailwindcss(),
   ],
+  server: {
+    allowedHosts: ["server.local"],
+  },
 });
