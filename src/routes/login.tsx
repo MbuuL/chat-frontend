@@ -3,12 +3,6 @@ import { useForm } from "@tanstack/react-form";
 import { useState } from "react";
 import { apiPost } from "../lib/api";
 
-interface LoginResponse {
-  message: string;
-  token: string;
-  user: { id: string; username: string };
-}
-
 export const Route = createFileRoute("/login")({
   component: Login,
 });
