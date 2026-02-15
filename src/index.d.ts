@@ -55,3 +55,23 @@ interface ChatAreaMainProps {
   messagesEndRef: React.RefObject<HTMLDivElement | null>;
   isOnline: (userId: string) => boolean;
 }
+
+interface PrivateRoom {
+  id: string;
+  user1: string;
+  user1Username: string;
+  user2: string;
+  user2Username: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+interface PrivateChatMessage {
+  id: string;
+  roomId: string;
+  fromId: string;
+  from: string;
+  message: string;
+  createdAt: string;
+  updatedAt: string;
+}

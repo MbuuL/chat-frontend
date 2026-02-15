@@ -34,6 +34,15 @@ export function useSendMessage() {
   return send;
 }
 
+export function useSendPrivateMessage() {
+  const send = useCallback((roomId: string, message: string) => {
+    if (sharedWs && sharedWs.readyState === WebSocket.OPEN) {
+      sharedWs.send(JSON.stringify({ type: "send_private_message", roomId, message }));
+    }
+  }, []);
+  return send;
+}
+
 export function usePublicChat() {
   const queryClient = useQueryClient();
   const reconnectRef = useRef(true);
@@ -59,6 +68,7 @@ export function usePublicChat() {
             ["publicChats"],
             (old) => {
               if (!old) return { chats: [data.chat] };
+              if (old.chats.some(c => c.id === data.chat.id)) return old;
               return { chats: [data.chat, ...old.chats] };
             },
           );
@@ -81,6 +91,17 @@ export function usePublicChat() {
             if (!old) return [];
             return old.filter(u => u.userId !== data.userId);
           });
+        }
+
+        if (data.type === "new_private_message" && data.chat) {
+          queryClient.setQueryData<{ chats: PrivateChatMessage[] }>(
+            ["privateChats", data.chat.roomId],
+            (old) => {
+              if (!old) return { chats: [data.chat] };
+              if (old.chats.some(c => c.id === data.chat.id)) return old;
+              return { chats: [data.chat, ...old.chats] };
+            },
+          );
         }
       }
       catch {
